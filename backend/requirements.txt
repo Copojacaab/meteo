@@ -1,0 +1,12 @@
+fastapi>=0.115.0                        # framework web: backend
+uvicorn[standard]                       # server ASGI (Async Server Gw Interface): motore dove gira FastAPI
+sqlalchemy[asyncio]>=2.0                # comunicazione asincrona con db
+asyncpg                                 # driver PostgreSQL: sa far girare le query  
+geoalchemy2                             # estenzione spaziale: salva GPS e query spaziali
+alembic                                 # DB migrating: fa evolvere lo schema senza perdere dati
+python-jose[cryptography]               # JWT
+pwdlib[argon2]                          # hasing password
+httpx                                   # HTTP client async: chiama Open-meteo api
+pydantic-settings                       # config: legge env var
+
+

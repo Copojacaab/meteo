@@ -1,85 +1,75 @@
-# Product Requirements Document (PRD)
-
-# Specifica di Progetto: Sistema di Tracking Meteo e Fenologico per Tartufai
+# Specifica di Progetto: Sistema di Tracking Meteo per Tartufai
 
 ## 1. Introduzione e Obiettivi
 
-Il progetto nasce dall'esigenza specifica dei cercatori di tartufi di monitorare i **microclimi** e l'**accumulo millimetrico di pioggia** in aree geografiche circoscritte (spot di raccolta). I sistemi meteo tradizionali forniscono medie cittadine che non riflettono le reali condizioni dei boschi o delle zone montuose.
+Il progetto nasce dall'esigenza dei cercatori di tartufi di monitorare i **microclimi** e l'**accumulo di pioggia** in aree geografiche circoscritte (spot di raccolta). I sistemi meteo tradizionali forniscono medie cittadine che non riflettono le condizioni reali dei boschi.
 
-L'obiettivo è creare un'applicazione che consenta il tracciamento a lungo termine delle precipitazioni, l'integrazione di dati biologici (fioritura delle piante) e la predisposizione per sensori IoT sul campo, aiutando l'utente a identificare le condizioni perfette per la nascita dei tartufi preservando la totale segretezza dei propri spot.
+L'obiettivo è un'applicazione per il tracciamento delle precipitazioni, con predisposizione futura per dati biologici (fioritura) e sensori IoT, aiutando l'utente a identificare le condizioni ideali per la nascita dei tartufi preservando la segretezza degli spot.
 
----
+## 2. Stack Tecnologico
 
-## 2. Architettura Funzionale (I 5 Moduli)
+| Componente | Scelta |
+|---|---|
+| **Backend** | FastAPI (Python) |
+| **Frontend** | React + Vite + Tailwind CSS |
+| **Mappa** | MapLibre GL JS |
+| **Database** | PostgreSQL + PostGIS |
+| **Meteo** | Open-Meteo API |
+| **Auth** | JWT (access + refresh token) |
+| **Deploy** | Docker Compose su VPS |
 
-### Modulo 1: CORE (Il Motore di Base)
+## 3. Architettura a Moduli
 
-Garantisce le funzionalità minime per il funzionamento dell'applicazione (MVP).
+### Modulo 1: CORE — MVP (Fase 1)
 
-- **Gestione Spot (Geofencing base):** Interfaccia mappa in cui l'utente può salvare coordinate GPS precise assegnando un nome e un raggio di interesse (es. 500 metri).
-- **Integrazione Provider Meteo (Open-Meteo):** Interfacciamento con le API esterne di Open-Meteo per scaricare in modo automatizzato:
-  - Lo storico delle precipitazioni (es. cumulato degli ultimi 14 e 30 giorni).
-  - Previsioni orarie e giornaliere per i successivi 7 giorni.
-- **Dashboard di Visualizzazione:** Schermata principale (inizialmente Web Responsive) con grafici chiari e intuitivi sull'andamento delle piogge per ciascuno spot salvato.
+Funzionalità minime per il funzionamento dell'app:
 
-### Modulo 2: NOTIFICHE & AUTOMAZIONE (La Proattività)
+- **Autenticazione JWT:** Registrazione e login utente
+- **Gestione Spot:** Interfaccia mappa (MapLibre) per salvare coordinate GPS con nome e raggio (es. 500m)
+- **Integrazione Open-Meteo:** Recupero automatico di storico precipitazioni (14/30gg) e previsioni 7 giorni
+- **Dashboard:** Grafici dell'andamento piogge per ogni spot + heatmap precipitazioni sulla mappa
 
-Evita all'utente di dover controllare manualmente l'applicazione, spingendo le informazioni rilevanti al momento giusto.
+### Modulo 2: NOTIFICHE & AUTOMAZIONE — Fase 2
 
-- **Schedulatore di Background (Cron Jobs):** Processo lato server per l'aggiornamento automatico dei dati meteo a orari prestabiliti.
-- **Daily Digest (Riepilogo Programmato):** \* _Sera (20:00 - 21:00):_ Bilancio della giornata (es. millimetri caduti, trend umidità) per pianificare le uscite del giorno successivo.
-  - _Mattina (07:00):_ Focus sulle previsioni della giornata e sull'accumulo notturno.
-- **Weather Alerter:** Sistema di monitoraggio che invia un avviso immediato se i radar meteo rilevano precipitazioni intense non previste o superiori a una determinata soglia in uno degli spot salvati.
+- Schedulatore background per aggiornamento dati meteo
+- Daily Digest (report serale/mattutino)
+- Weather Alerter (avviso piogge non previste)
 
-### Modulo 3: DIARIO & FENOLOGIA (Il Cervello Analytics)
+### Modulo 3: DIARIO & FENOLOGIA — Fase 2
 
-Trasforma i dati grezzi in insight predittivi legando il meteo alla botanica e alla raccolta reale.
+- Quaderno dei ritrovamenti (data, spot, quantità, note)
+- Taccuino fenologico (stato vegetativo piante simbionti)
+- Motore di correlazione meteo + biologia + raccolti
 
-- **Quaderno dei Ritrovamenti:** Registro privato dove l'utente inserisce i dati delle raccolte (Data, Spot, Quantità, Qualità/Specie di tartufo, Note).
-- **Registro della Fioritura (Taccuino Fenologico):** Annotazione dello stato vegetativo delle "piante spia" o simbionti (es. Quercia, Nocciolo, Biancospino) con relativi stadi (Gemma, Piena fioritura, Caduta foglie). X
-- **Il Triangolo dei Dati (Motore di Correlazione):** Algoritmo che incrocia automaticamente:
-  1.  _Dati Meteo/IoT:_ Pioggia e umidità accumulate nei 14-30 giorni precedenti.
-  2.  _Dati Biologici:_ Stato della fioritura/fenologia nello spot.
-  3.  _Output:_ Successo della raccolta per identificare i pattern ideali di nascita.
+### Modulo 4: IOT & SENSORISTICA — Futuro
 
-### Modulo 4: IOT & SENSORISTICA (L'Evoluzione Hardware)
+- API ingestion per sensori fisici
+- Pluviometro locale e sensore umidità terreno
+- Data Override Logic (priorità a sensore fisico se online)
 
-Predisposizione per superare l'approssimazione dei modelli meteo teorici tramite hardware sul campo.
+### Modulo 5: SICUREZZA — Trasversale
 
-- **Ingestion API:** Endpoint protetti e ottimizzati per ricevere pacchetti dati trasmessi da centraline nascoste nei boschi.
-- **Sensori Target:** Pluviometro locale (sotto chioma) e sensore di umidità del terreno a livello delle radici.
-- **Data Override Logic:** Algoritmo che assegna priorità al dato fisico del sensore se aggiornato nelle ultime 24 ore, effettuando il fallback sul dato stimato di Open-Meteo in caso di sensore offline.
+- Isolamento multi-tenancy (RLS PostgreSQL)
+- JWT stateless
 
-### Modulo 5: SECURITY & PRIVACY (La Fondazione)
+## 4. Roadmap
 
-Strato trasversale per proteggere il segreto industriale di ogni tartufaio.
+### Fase 1: MVP
 
-- **Isolamento degli Spot (Multi-tenancy rigida):** Struttura del database progettata affinché nessun utente possa intercettare o visualizzare le coordinate geografiche degli spot altrui.
-- **Autenticazione Stateless (JWT):** Token di sicurezza ideali sia per l'architettura Web iniziale che per il futuro passaggio ad app mobile nativa.
+| Sprint | Contenuto |
+|---|---|
+| **Sprint 1** | Docker Compose (Postgres/PostGIS + FastAPI + frontend), auth JWT, modello User |
+| **Sprint 2** | Modello Spot (PostGIS), CRUD spot, mappa MapLibre |
+| **Sprint 3** | Integrazione Open-Meteo API, cron job aggiornamento dati |
+| **Sprint 4** | Dashboard con grafici (Chart.js/Recharts), heatmap precipitazioni |
 
----
+### Fase 2: Evoluzione
 
-## 3. Strategia di Sviluppo e Stack Tecnologico
+- Notifiche (Daily Digest, Weather Alerter)
+- Diario ritrovamenti e taccuino fenologico
+- Motore di correlazione
+- App mobile
 
-L'approccio scelto è **API-First** per garantire massima flessibilità e velocità di sviluppo (Fast Developing).
+### Fase 3: Futuro
 
-- **Backend:** Sviluppo di un'API REST indipendente utilizzando framework performanti e snelli come **FastAPI (Python)** o **Node.js**. Questo permetterà di mantenere lo stesso identico motore di backend sia per la Web App che per la futura App Mobile.
-- **Frontend Web:** Single Page Application (SPA) responsive ottimizzata per l'uso da smartphone tramite utility come **Tailwind CSS**.
-- **Database:** **PostgreSQL** con estensione spaziale **PostGIS** per gestire in modo ottimale le coordinate geografiche, il geofencing e le serie temporali delle precipitazioni.
-- **Sorgente Dati Meteo:** **Open-Meteo API** (gratuita per uso non commerciale, senza necessità iniziale di API Key, basata su modelli storici accurati come ERA5).
-- **Hosting e Deployment:** Hosting su una **VPS** (es. Hetzner, DigitalOcean, OVH) gestito tramite **Docker e Docker Compose** per isolare i servizi (Backend, Database, Nginx come reverse proxy e Let's Encrypt per la gestione automatica del certificato SSL/HTTPS).
-
----
-
-## 4. Roadmap di Rilascio (Fasi del Progetto)
-
-| Fase 1: MVP (Web App V1)                             | Fase 2: Evoluzione (App Mobile & IoT)              |
-| :--------------------------------------------------- | :------------------------------------------------- |
-| Registrazione utenti e autenticazione JWT            | Sistema di Notifiche Push (Daily Digest & Alerter) |
-| Gestione Spot su Mappa (Core Geofencing)             | Taccuino Fenologico (Fioriture delle piante)       |
-| Integrazione dati Storici/Previsioni Open-Meteo      | Algoritmo di Correlazione (Triangolo dei Dati)     |
-| Dashboard responsive con grafici pioggia 14/30gg     | Ingestion API e Integrazione Sensori Fisici (IoT)  |
-| Isolamento e crittografia lato DB degli spot salvati | Sviluppo App Mobile Nativa (iOS / Android)         |
-
-specifiche_progetto_meteo_tartufai.md
-Visualizzazione di specifiche_progetto_meteo_tartufai.md.
+- API IoT e integrazione sensori hardware
