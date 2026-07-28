@@ -1,0 +1,39 @@
+# Ogni service é un container. docker compose crea una rete virtuale di container, avvia i servizi nell'ordine corretto e offre persistenza db
+
+services:         # (1) lista dei container
+  db:             # (2) nome
+    image: postgis/postgis:16-3.4     #2a. immagine prefatta su docker Hub
+    environment:                       #2b. variabili d'ambiente
+      POSTGRES_DB: meteo
+      POSTGRES_USER: meteo
+      POSTGRES_PASSWORD: meteo_dev
+    ports:                            #2c. mappa la porta del container(dx) alla porta della macchina(sx)
+      - "5432:5432"
+    volumes:                          #2d. salva i dati in un volume persistente
+      - pgdata:/var/lib/postgresql/data    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U meteo"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend: 
+    build: ./backend                  # costruisce l'immagine del container di backend (similare a image in db solo che quella é prefatta)
+    ports: 
+      - "8000:8000"
+    environment: 
+      DATABASE_URL: postgresql+asyncpg://meteo:meteo_dev@db:5432/meteo
+      SECRET_KEY: dev-secret-key-change-in-production
+    depends_on:                       #2e. backedn parte solo quando db healthy
+      db: 
+        condition: service_healty
+    
+  frontend: 
+    build: ./frontend
+    ports: 
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes: 
+  pgdata:
