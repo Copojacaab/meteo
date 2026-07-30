@@ -10,3 +10,16 @@ httpx                                   # HTTP client async: chiama Open-meteo a
 pydantic-settings                       # config: legge env var
 
 
+fastapi>=0.115.0
+uvicorn[standard]
+sqlalchemy[asyncio]>=2.0
+asyncpg
+geoalchemy2
+alembic
+python-jose[cryptography]
+pwdlib[argon2]
+httpx
+pydantic-settings
+
+# CLI
+typer

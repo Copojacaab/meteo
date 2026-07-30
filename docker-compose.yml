@@ -26,14 +26,14 @@ services:         # (1) lista dei container
       SECRET_KEY: dev-secret-key-change-in-production
     depends_on:                       #2e. backedn parte solo quando db healthy
       db: 
-        condition: service_healty
+        condition: service_healthy
     
-  frontend: 
-    build: ./frontend
-    ports: 
-      - "5173:5173"
-    depends_on:
-      - backend
+  # frontend: 
+  #   build: ./frontend
+  #   ports: 
+  #     - "5173:5173"
+  #   depends_on:
+  #     - backend
 
 volumes: 
   pgdata:
