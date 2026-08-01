@@ -17,7 +17,7 @@
 | Step | Obiettivo | Deliverable | Conoscenze chiave | Stato |
 |---|---|---|---|---|
 | 0.1 | `database.py` | Engine + sessione asincrona SQLAlchemy | async engine, sessionmaker, DeclarativeBase | ✅ |
-| 0.2 | `config.py` completo | Settings Pydantic (DATABASE_URL, SECRET_KEY) | pydantic-settings, env var | ⬜ |
+| 0.2 | `config.py` completo | Settings Pydantic (DATABASE_URL, SECRET_KEY) | pydantic-settings, env var | ✅ |
 | 0.3 | Modello `User` | Tabella `users` | Mapped/mapped_column, hashing | ⬜ |
 
 ## Fase 1: Database & Migrazioni

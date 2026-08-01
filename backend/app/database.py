@@ -13,10 +13,14 @@
         4. Espone il generatore (get_db()) che FastApPI userá come dependency per iniettare la sessione in ogni endpoint
 """
 
+# === My import ===
+from .config import settings
+# =================
+
 from sqlalchemy.ext.asyncio import AsyncAttrs, AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
-DATABASE_URL = "postgresql+asyncpg://meteo:meteo_dev@db:5432/meteo"
+DATABASE_URL = settings.database_url
 
 #  (1) crea engine asincrono
 engine = create_async_engine(DATABASE_URL, echo=True)

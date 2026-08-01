@@ -57,6 +57,23 @@ python -c "import inspect; from modulo import funzione; print(inspect.getsource(
 - Massimo totale simultaneo = pool_size + max_overflow (15).
 - Connessioni pool = riutilizzate; overflow = si aprono quando il pool è saturo e si chiudono subito dopo.
 
+### 8. Gerarchia pydantic-settings
+Ordine di priorità nella lettura delle impostazioni (vince il primo trovato):
+1. Variabili d'ambiente del **sistema** (es. quelle in docker-compose.yml)
+2. File **`.env`** (se `env_file` è configurato in SettingsConfigDict)
+3. **Default** nel codice (`database_url: str = "..."`)
+
+Conseguenza: ambienti diversi (dev/test/prod) senza toccare il codice — ogni ambiente imposta le proprie env vars. `SettingsConfigDict` è il "pannello di controllo" che dice come leggere (env_file, prefissi, ecc.).
+
+### 9. Errore "no configuration file provided" da Docker
+- Significa che Docker non ha trovato il `docker-compose.yml` — sei nella cartella sbagliata.
+- Verifica sempre di essere nella root del progetto (`pwd` / `cd ..`).
+
+### 10. Il container è una fotografia del codice
+- Il `COPY . .` del Dockerfile avviene **al build**: il container non vede le modifiche ai file fatte dopo.
+- Dopo aver cambiato codice, serve `docker compose build backend && docker compose up -d`.
+- Verifica rapida di cosa vede il container: `docker compose exec backend cat app/config.py`.
+
 ## Regole d'uso
 
 - Aggiungi UN trucchetto per step, con esempio minimo.
