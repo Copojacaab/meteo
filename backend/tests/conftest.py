@@ -21,7 +21,7 @@ def settings() -> Settings:
 async def client():
     from app.main import app
 
-    transport = httpx.ASCITransport(app=app)
+    transport = httpx.ASGITransport(app=app)
 
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
         yield client
