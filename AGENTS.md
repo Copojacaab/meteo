@@ -40,7 +40,8 @@ backend/                    # FastAPI (Python 3.12) + CLI
 └── Dockerfile
 frontend/                   # NOT YET CREATED (commented out of docker-compose)
 docker-compose.yml          # PostGIS + backend only (frontend commented out)
-docs/stack-reference.md     # Detailed tech docs
+docs/project/stack-reference.md     # Detailed tech docs
+docs/project/opencode-workflow.md   # OpenCode workflow and agent operating rules
 .opencode/project-context.md  # Agent context
 .opencode/project_ideas/PRD.md  # Product requirements
 ```
@@ -96,3 +97,16 @@ meteo-cli db --help
 - `.opencode/.gitignore` excludes itself + `node_modules` + `package.json` — these are not tracked
 - Open-Meteo archive (ERA5) covers from 1940; forecast gives 7 days
 - Alembic is initialized but has no migrations. First run: `alembic revision --autogenerate -m "init"` then `alembic upgrade head`.
+
+## OpenCode workflow
+
+This project follows the manual workflow defined in `docs/project/opencode-workflow.md`. That document is the authoritative reference for the two workflows, agent roles, artefact structure and handoffs. OpenCode acts as a consultant: it analyses, interviews, proposes and verifies; the developer writes the code.
+
+Binding operating rules for every session:
+
+- **Code changes require explicit user approval.** OpenCode prepares a short proposal covering what to change, where, expected behaviour and suggested verification. It does not apply code patches without approval. A failing test receives a diagnosis before any proposed fix.
+- **Permissions differ by activity.** Repository analysis and verification commands may run directly. Configuration and plan changes may be applied directly. Existing documentation may be updated only after an adaptive interview. New documentation files require a proposal explaining their purpose, necessity and why an existing artefact is insufficient.
+- **Interviews precede official artefact updates.** The interview depth adapts to ambiguity, risk, architectural impact and dependencies. It ends only after OpenCode presents a summary and the user explicitly confirms it; without confirmation, no official artefact is created or updated.
+- **Conflicts stop the flow.** If a proposal conflicts with a previous artefact, OpenCode describes the conflict and asks for a decision instead of resolving it autonomously.
+- **Handoffs are manual.** Each step produces its expected artefact and reports the result, open questions and next suggested agent or mandate. OpenCode never activates the next agent autonomously.
+- **The workflow choice is explicit for each cycle.** Use Workflow A for specialist agents or Workflow B for generalist agents with an explicit mandate, at either macro-project or component scope. Detailed sequences, versioning rules and conceptual commands remain in `docs/project/opencode-workflow.md`.

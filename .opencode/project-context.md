@@ -51,9 +51,9 @@ meteo/
 
 ## Regole per l'agente
 
-- Per decisioni su librerie/framework, consultare `docs/stack-reference.md`
+- Per decisioni su librerie/framework, consultare `docs/project/stack-reference.md`
 - Per lo stato del progetto e roadmap, consultare `PRD.md` e questo file
 - Usare Context7 per fetchare documentazione aggiornata quando necessario
-- Seguire le convenzioni specificate in `docs/stack-reference.md#9-convenzioni-di-progetto`
+- Seguire le convenzioni specificate in `docs/project/stack-reference.md#9-convenzioni-di-progetto`
 - **Non aggiungere commenti al codice** (tranne se esplicitamente richiesto)
 - Prima di scrivere codice, leggere i file esistenti per capire lo stile
