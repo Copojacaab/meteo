@@ -1,104 +1,117 @@
 # Roadmap Meteo Tartufai — da 0 a MVP
 
-> Obiettivo finale: applicazione di tracciamento precipitazioni per tartufai (auth JWT, spot GPS, dati Open-Meteo, dashboard).
-> Questo file è il punto di riferimento di ogni sessione. Aggiorna gli step con ✅ quando completati.
+> Obiettivo MVP: applicazione per monitorare precipitazioni e condizioni meteo di spot privati, con autenticazione, mappa, dati Open-Meteo e dashboard.
+> Questo file è la fonte unica di verità per fasi, dipendenze, criteri di accettazione e stato del progetto.
 
 ## Regole di avanzamento
 
-1. **Un passo alla volta** — non si avanza finché lo step corrente non è compreso e testato.
-2. **TDD sempre** — test prima del codice.
-3. **Ogni step ha la struttura**: concetto → analisi → esercizio pratico.
-4. **Alla fine di ogni fase** — verifica che tutto funzioni insieme (`docker compose up`).
+1. Un passo alla volta: non si avanza finché lo step corrente non è compreso, implementato e verificato.
+2. TDD: il test viene definito prima dell'implementazione, quando il livello del componente lo consente.
+3. Ogni step segue il ciclo: concetto, analisi, esercizio o implementazione, verifica.
+4. Alla fine di ogni fase si verifica l'integrazione disponibile con `docker compose up --build`.
+5. Le funzionalità di notifiche, diario, fenologia e IoT sono fuori scope per questa MVP.
 
----
+## Stato attuale verificato
 
-## Fase 0: Fondamenta (DB & Config)
+| Elemento | Stato | Nota |
+|---|---|---|
+| `database.py` | ✅ | Engine async, session factory, `Base` e `get_db` presenti |
+| `config.py` | ✅ | Settings iniziali con URL DB e secret da ambiente |
+| `models/user.py` | ⏸️ | Walking skeleton presente; analisi rinviata su richiesta dell'utente |
+| `app/main.py` | ⬜ | Assente; necessario per avviare il backend |
+| Alembic | ⬜ | Dipendenza presente, struttura non inizializzata |
+| CLI | ⬜ | Scheletro Typer con comandi DB placeholder |
+| Test | ⬜ | Nessun test presente |
+| Frontend | ⬜ | Non ancora creato; servizio Compose commentato |
 
-| Step | Obiettivo | Deliverable | Conoscenze chiave | Stato |
-|---|---|---|---|---|
-| 0.1 | `database.py` | Engine + sessione asincrona SQLAlchemy | async engine, sessionmaker, DeclarativeBase | ✅ |
-| 0.2 | `config.py` completo | Settings Pydantic (DATABASE_URL, SECRET_KEY) | pydantic-settings, env var | ✅ |
-| 0.3 | Modello `User` | Tabella `users` | Mapped/mapped_column, hashing | ⬜ |
+## Fase 1 — Baseline eseguibile
 
-## Fase 1: Database & Migrazioni
+Questa fase rende verificabile lo scaffold e prepara il lavoro applicativo. Corrisponde all'infrastruttura iniziale dello Sprint 1 del PRD.
 
-| Step | Obiettivo | Deliverable | Conoscenze chiave | Stato |
-|---|---|---|---|---|
-| 1.1 | Modello `Spot` | Tabella `spots` con geometria | GeoAlchemy2, Geometry POINT | ⬜ |
-| 1.2 | Prima migrazione Alembic | Tabelle reali nel DB | alembic revision/upgrade | ⬜ |
-| 1.3 | Test DB con pytest | Connessione e CRUD verificati | pytest-asyncio, fixture | ⬜ |
+| Step | Obiettivo | Deliverable | Dipendenze | Criterio di accettazione | Stato |
+|---|---|---|---|---|---|
+| 1.1 | Test baseline | Aggiungere `pytest`, `pytest-asyncio` e `httpx`; configurare raccolta test e fixture minime | Nessuna | `pytest` raccoglie ed esegue almeno un test verde | ⬜ |
+| 1.2 | Entry point API | Creare `backend/app/main.py` con app FastAPI e endpoint `/api/health` | 1.1 | `docker compose up --build` avvia il backend e `curl localhost:8000/api/health` restituisce HTTP 200 | ⬜ |
+| 1.3 | Migrazioni | Inizializzare Alembic in `backend/`, configurare ambiente async, `settings.database_url`, `Base.metadata` e import dei modelli | 1.2 | `alembic upgrade head` termina senza errori su un database vuoto | ⬜ |
 
-## Fase 2: Services (Business Logic)
+Il `Dockerfile` attuale punta correttamente a `app.main:app` una volta creato l'entry point. Hardening Dockerfile, utente non-root e healthcheck di produzione sono rimandati alla fase opzionale finale.
 
-| Step | Obiettivo | Deliverable | Conoscenze chiave | Stato |
-|---|---|---|---|---|
-| 2.1 | Service `auth` | Registrazione + login + hash | pwdlib, argon2 | ⬜ |
-| 2.2 | Service `spots` | CRUD completo con query spaziali | ST_DWithin, select async | ⬜ |
-| 2.3 | Service `meteo` | Fetch Open-Meteo + salvataggio | httpx async, parsing | ⬜ |
+## Fase 2 — Autenticazione
 
-## Fase 3: API (Routers FastAPI)
+Questa fase completa la parte auth dello Sprint 1. Il primo step è bloccato finché l'utente non sblocca l'analisi del modello `User`.
 
-| Step | Obiettivo | Deliverable | Conoscenze chiave | Stato |
-|---|---|---|---|---|
-| 3.1 | Router `auth` | `/api/auth/register`, `/api/auth/login` | OAuth2PasswordBearer, JWT | ⬜ |
-| 3.2 | Router `spots` | CRUD `/api/spots/*` | dependency injection, Pydantic schemas | ⬜ |
-| 3.3 | Router `meteo` | `/api/spots/{id}/refresh`, dati storici | BackgroundTasks | ⬜ |
-| 3.4 | `main.py` | App FastAPI completa con router | include_router, prefix | ⬜ |
+| Step | Obiettivo | Deliverable | Dipendenze | Criterio di accettazione | Stato |
+|---|---|---|---|---|---|
+| 2.1 | Revisione User | Analizzare e confermare campi, vincoli, timestamp e responsabilità del modello | Gate esplicito dell'utente | Specifica approvata senza modificare il modello prima della conferma | ⏸️ |
+| 2.2 | Persistenza User | Test di vincoli e CRUD; prima migrazione con tabella `users` | 1.3, 2.1 | Migrazione applicata; email unica e password memorizzata solo come hash | ⬜ |
+| 2.3 | Service auth | Registrazione, verifica password e login con `pwdlib`/Argon2 | 2.2 | Test unitari verdi per registrazione, credenziali valide e credenziali errate | ⬜ |
+| 2.4 | Router auth | Endpoint `/api/auth/register` e `/api/auth/login` con JWT | 2.3 | Test API verdi; login restituisce access token senza esporre la password | ⬜ |
+| 2.5 | Dipendenze auth | `get_current_user`, OAuth2 bearer e gestione degli errori 401 | 2.4 | Un endpoint protetto rifiuta token assente, invalido o scaduto | ⬜ |
 
-## Fase 4: Auth & Sicurezza
+## Fase 3 — Spot e mappa
 
-| Step | Obiettivo | Deliverable | Conoscenze chiave | Stato |
-|---|---|---|---|---|
-| 4.1 | `dependencies.py` | `get_current_user`, `get_db` | Depends, OAuth2, errori 401 | ⬜ |
-| 4.2 | Protezione endpoint | Solo utenti autenticati accedono ai propri spot | ownership check | ⬜ |
+Questa fase implementa lo Sprint 2 del PRD.
 
-## Fase 5: Frontend (React + Vite + Tailwind)
+| Step | Obiettivo | Deliverable | Dipendenze | Criterio di accettazione | Stato |
+|---|---|---|---|---|---|
+| 3.1 | Modello Spot | Modello con proprietario, nome, coordinate PostGIS POINT e raggio | Fase 2 | Test di validazione e persistenza dello spot verdi | ⬜ |
+| 3.2 | Migrazione Spot | Migrazione dello schema `spots` con indice spaziale se necessario | 3.1 | `alembic upgrade head` crea lo schema senza errori | ⬜ |
+| 3.3 | Service Spot | CRUD e query spaziali con controllo ownership | 3.2 | Un utente non può leggere o modificare spot di un altro utente | ⬜ |
+| 3.4 | API Spot | Schemas Pydantic e router `/api/spots/*` | 3.3 | Test API verdi per creazione, lettura, modifica e cancellazione | ⬜ |
+| 3.5 | Frontend base | Progetto React/Vite/Tailwind con autenticazione e client API | 3.4 | Frontend avviabile e login collegato al backend | ⬜ |
+| 3.6 | Mappa | MapLibre con creazione, visualizzazione e selezione degli spot | 3.5 | L'utente vede e gestisce dalla mappa esclusivamente i propri spot | ⬜ |
 
-| Step | Obiettivo | Deliverable | Conoscenze chiave | Stato |
-|---|---|---|---|---|
-| 5.1 | Setup Vite + Tailwind | Progetto frontend in `frontend/` | `npm create vite`, tailwind | ⬜ |
-| 5.2 | Mappa MapLibre | Mappa con spot salvati | maplibre-gl, marker | ⬜ |
-| 5.3 | Auth UI | Login/registrazione | React state, fetch | ⬜ |
-| 5.4 | Dashboard grafici | Precipitazioni con Recharts | LineChart, BarChart | ⬜ |
-| 5.5 | Heatmap | Overlay precipitazioni | heatmap layer MapLibre | ⬜ |
-| 5.6 | Docker compose frontend | Unico `docker compose up` | build frontend, proxy | ⬜ |
+## Fase 4 — Dati Open-Meteo
 
-## Fase 6: CLI (Collegare lo scheletro esistente)
+Questa fase implementa lo Sprint 3 del PRD.
 
-| Step | Obiettivo | Deliverable | Conoscenze chiave | Stato |
-|---|---|---|---|---|
-| 6.1 | `db status` funzionante | Stato migrazioni reali | Typer + Alembic API | ⬜ |
-| 6.2 | `meteo import` | Import batch dati meteo | services riusati dalla CLI | ⬜ |
-| 6.3 | `report generate` | Report PDF/JSON | export, formattazione | ⬜ |
+| Step | Obiettivo | Deliverable | Dipendenze | Criterio di accettazione | Stato |
+|---|---|---|---|---|---|
+| 4.1 | Modello dati meteo | Tabelle per letture giornaliere e previsione associate a uno spot | Fase 3 | Test di persistenza e associazione allo spot verdi | ⬜ |
+| 4.2 | Service meteo | Client `httpx` async per storico 14/30 giorni e previsione 7 giorni | 4.1 | Test con risposta Open-Meteo simulata e gestione del parsing verificata | ⬜ |
+| 4.3 | Migrazione meteo | Migrazione delle tabelle e degli indici necessari | 4.1 | Schema aggiornato con Alembic senza perdita dei dati esistenti | ⬜ |
+| 4.4 | Refresh API | Endpoint `/api/spots/{id}/refresh` con controllo ownership | 4.2, 4.3 | Un refresh salva dati per lo spot corretto e rifiuta spot non autorizzati | ⬜ |
+| 4.5 | CLI meteo | Comandi `meteo fetch` e `meteo import` che riusano il service | 4.2 | CLI e API usano la stessa logica e producono risultati coerenti | ⬜ |
 
-## Fase 7: Test & Qualità
+## Fase 5 — Dashboard MVP
 
-| Step | Obiettivo | Deliverable | Conoscenze chiave | Stato |
-|---|---|---|---|---|
-| 7.1 | Test unitari services | Copertura auth, spots, meteo | pytest, mock httpx | ⬜ |
-| 7.2 | Test API | Endpoint verificati end-to-end | httpx AsyncClient, TestClient | ⬜ |
-| 7.3 | CI + pre-commit | Lint, typecheck, test automatici | ruff, pre-commit | ⬜ |
+Questa fase implementa lo Sprint 4 del PRD.
 
-## Fase 8: Produzione (Optional)
+| Step | Obiettivo | Deliverable | Dipendenze | Criterio di accettazione | Stato |
+|---|---|---|---|---|---|
+| 5.1 | API dashboard | Endpoint per serie storiche, cumulati e previsioni dello spot | Fase 4 | Risposta validata con dati ordinati temporalmente | ⬜ |
+| 5.2 | Grafici | Grafici Recharts per pioggia giornaliera e cumulata | 5.1 | L'utente vede andamento 14/30 giorni dello spot selezionato | ⬜ |
+| 5.3 | Heatmap | Layer MapLibre per visualizzare l'intensità delle precipitazioni | 5.1 | La mappa mostra il layer meteo senza esporre dati di spot di altri utenti | ⬜ |
+| 5.4 | Flusso MVP completo | Integrazione login, spot, refresh e dashboard | 5.2, 5.3 | Un utente registrato completa il percorso end-to-end senza interventi manuali sul DB | ⬜ |
 
-| Step | Obiettivo | Deliverable | Conoscenze chiave | Stato |
-|---|---|---|---|---|
-| 8.1 | Deploy VPS | Docker Compose prod | Nginx, Let's Encrypt | ⬜ |
-| 8.2 | Backup & monitoraggio | Restore, healthcheck | cron, pg_dump | ⬜ |
+## Fase 6 — Qualità e CLI finale
 
----
+Questa fase chiude la MVP e consolida lo scheletro CLI esistente.
 
-## Stato attuale progetto (al fork sessione)
+| Step | Obiettivo | Deliverable | Dipendenze | Criterio di accettazione | Stato |
+|---|---|---|---|---|---|
+| 6.1 | CLI DB | Collegare `db status`, `db migrate` e `db rollback` alle API Alembic | Fase 5 | I comandi riflettono e modificano lo stato reale delle migrazioni | ⬜ |
+| 6.2 | Suite test | Test unitari service, test API e test di integrazione DB | Fasi 2-5 | Tutti i test passano in ambiente riproducibile | ⬜ |
+| 6.3 | Qualità automatica | Configurare Ruff, type-check e pre-commit | 6.2 | Controlli automatici verdi su ogni modifica | ⬜ |
+| 6.4 | Compose MVP | Aggiungere il servizio frontend e verificare lo stack completo | 5.4 | `docker compose up --build` avvia DB, backend e frontend | ⬜ |
 
-- Backend scaffoldato FastAPI (moduli vuoti)
-- CLI scheletro Typer in `backend/app/cli/` (comandi `pass`)
-- Nessun modello, nessuna migrazione, nessun test
-- `docker-compose.yml`: db + backend attivi, frontend commentato
-- Documentazione: `docs/project/stack-reference.md`, `AGENTS.md`, `.opencode/project-context.md`
+## MVP completata quando
+
+- un utente può registrarsi e autenticarsi;
+- ogni utente può creare e gestire i propri spot GPS;
+- l'app recupera storico e previsioni Open-Meteo per gli spot autorizzati;
+- dashboard e mappa mostrano pioggia e previsioni;
+- API, CLI e frontend condividono i service;
+- migrazioni, test e controlli di qualità sono eseguibili in modo riproducibile;
+- il flusso completo funziona con `docker compose up --build`.
+
+## Fuori scope MVP
+
+Notifiche, daily digest, weather alert, diario ritrovamenti, fenologia, correlazioni biologiche, sensori IoT e deploy VPS restano fasi successive.
 
 ## Note di contesto
 
-- Livello utente: conosce un po' di PostgreSQL, poco SQLAlchemy → gli step 0-1 saranno più lenti e ricchi di spiegazioni
-- Trucchetti accumulati in `docs/project/tricks.md` (aggiornare a ogni step)
-- Convenzioni: codice/documenti in italiano, niente commenti nel codice, TDD
-- Stack: FastAPI + SQLAlchemy 2.0 async + GeoAlchemy2 + Alembic + pytest + React/Vite/Tailwind + MapLibre + Recharts + Open-Meteo + Docker Compose
+- Il livello iniziale dell'utente richiede spiegazioni approfondite su PostgreSQL, SQLAlchemy e PostGIS.
+- I trucchetti appresi vengono raccolti in `docs/project/tricks.md`.
+- Documentazione e comunicazione del progetto sono in italiano; il codice non riceve commenti salvo richiesta esplicita.
+- Lo stack MVP è FastAPI, SQLAlchemy async, GeoAlchemy2, Alembic, PostgreSQL/PostGIS, React/Vite/Tailwind, MapLibre, Recharts, Open-Meteo e Docker Compose.

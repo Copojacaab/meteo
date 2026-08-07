@@ -18,42 +18,37 @@
 meteo/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py
 │   │   ├── config.py
 │   │   ├── database.py
-│   │   ├── dependencies.py
+│   │   ├── cli/
 │   │   ├── models/
+│   │   │   └── user.py          # walking skeleton; review postponed
 │   │   ├── schemas/
 │   │   ├── routers/
 │   │   └── services/
-│   ├── alembic/
 │   ├── requirements.txt
 │   └── Dockerfile
-├── frontend/
-│   ├── src/
-│   ├── package.json
-│   ├── vite.config.ts
-│   └── Dockerfile
 ├── docs/
-│   └── stack-reference.md    # Documentazione tecnica dettagliata
+│   └── project/
+│       ├── roadmap.md
+│       ├── stack-reference.md
+│       └── opencode-workflow.md
 ├── docker-compose.yml
-├── PRD.md                    # Requisiti di progetto
+├── .opencode/project_ideas/PRD.md # Requisiti di progetto
 └── .opencode/
     └── project-context.md    # Questo file
 ```
 
 ## Roadmap MVP
 
-1. **Sprint 1:** Docker Compose, auth JWT, modello User
-2. **Sprint 2:** Modello Spot (PostGIS), CRUD spot, mappa
-3. **Sprint 3:** Open-Meteo API, aggiornamento dati meteo
-4. **Sprint 4:** Dashboard grafici, heatmap precipitazioni
+La fonte unica per fasi, dipendenze, criteri di accettazione e stato è `docs/project/roadmap.md`. La roadmap traduce gli sprint MVP del PRD in passi verificabili.
 
 ## Regole per l'agente
 
 - Per decisioni su librerie/framework, consultare `docs/project/stack-reference.md`
-- Per lo stato del progetto e roadmap, consultare `PRD.md` e questo file
+- Per lo stato del progetto e roadmap, consultare `docs/project/roadmap.md` e `.opencode/project_ideas/PRD.md`
 - Usare Context7 per fetchare documentazione aggiornata quando necessario
 - Seguire le convenzioni specificate in `docs/project/stack-reference.md#9-convenzioni-di-progetto`
+- Non estendere `backend/app/models/user.py`: l'analisi del modello è rinviata su richiesta dell'utente e costituisce un gate della roadmap.
 - **Non aggiungere commenti al codice** (tranne se esplicitamente richiesto)
 - Prima di scrivere codice, leggere i file esistenti per capire lo stile

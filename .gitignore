@@ -1,1 +1,21 @@
-sqlalchemy_20/
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+backend/.back_venv/
+
+# Environment
+.env
+.env.*
+
+# Local agent state and scratch files
+.omo/
+opencode_sessions/
+tmp/
+
+# Optional local SQLAlchemy offline mirror
+docs/sqlalchemy/sqlalchemy_20/
+
+# OS
+.DS_Store

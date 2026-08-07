@@ -11,3 +11,7 @@ pydantic-settings                       # config: legge env var
 
 # CLI
 typer
+
+# TEST
+pytest
+pytest-asyncio
