@@ -10,8 +10,19 @@
 """
 
 import pytest
+import httpx
 from app.config import Settings
 
 @pytest.fixture
 def settings() -> Settings:
     return Settings()
+
+@pytest.fixture
+async def client():
+    from app.main import app
+
+    transport = httpx.ASCITransport(app=app)
+
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        yield client
+
