@@ -26,11 +26,11 @@ No `.env` needed for dev — defaults work.
 
 ## Current state
 
-- **Backend scaffolded** — `config.py` and `database.py` contain the initial settings and async database infrastructure. `models/user.py` contains a walking skeleton whose analysis is postponed at the user's request. `routers/`, `schemas/` and `services/` are still empty stubs, and `app/main.py` does not exist yet.
+- **Backend baseline** — `config.py` and `database.py` contain the settings and async database infrastructure. `app/main.py` exposes `/api/health` and the auth router. `models/user.py` defines the persisted User model; auth schemas, service, router and current-user dependency are implemented.
 - **CLI** — developed inside `backend/app/cli/` using **Typer**. Run via `docker compose exec backend python -m app.cli.main <command>`.
 - **Frontend** — does not exist. `frontend` service is **commented out** in `docker-compose.yml`.
-- **Alembic** — listed in `requirements.txt` but not initialized: there is no `backend/alembic/` directory or `alembic.ini` yet.
-- **Tests** — none. Expected framework: `pytest` + `pytest-asyncio` + `httpx`.
+- **Alembic** — initialized in `backend/alembic/` with `backend/alembic.ini`; the `users` migration is applied.
+- **Tests** — baseline and auth suite configured in `backend/pytest.ini` and `backend/tests/`; framework: `pytest` + `pytest-asyncio` + `httpx`; 23 tests pass in Compose.
 - **CI / pre-commit / lint** — none configured.
 - **Roadmap** — `docs/project/roadmap.md` is the single source of truth for development phases and status.
 
@@ -47,10 +47,10 @@ backend/                    # FastAPI (Python 3.12) + CLI
 │   ├── config.py           # Pydantic settings
 │   ├── database.py         # Async engine, session factory and DeclarativeBase
 │   ├── models/             # SQLAlchemy models; user.py is a walking skeleton
-│   ├── schemas/            # Pydantic schemas (empty stub)
-│   ├── routers/            # FastAPI routers (empty stub)
-│   └── services/           # Business logic (empty stub)
-├── alembic/                # NOT YET CREATED (planned in roadmap)
+│   ├── schemas/            # Pydantic API schemas
+│   ├── routers/            # FastAPI routers and auth dependencies
+│   └── services/           # Business logic, including auth
+├── alembic/                # Async migrations; users migration present
 ├── requirements.txt
 └── Dockerfile
 frontend/                   # NOT YET CREATED (commented out of docker-compose)
@@ -127,8 +127,8 @@ Quando si studia un nuovo strumento, il consulente deve prima spiegarne il ruolo
 - Backend `.vscode/.prettierrc` sets tabWidth:2, no tabs
 - `.opencode/.gitignore` excludes itself + `node_modules` + `package.json` — these are not tracked
 - Open-Meteo archive (ERA5) covers from 1940; forecast gives 7 days
-- Alembic is not initialized. In the roadmap, run `alembic init alembic` from `backend/`, configure `env.py` with `Base.metadata` and model imports, then generate and apply the first real migration only after the User-model gate and step 2.2.
-- The Dockerfile currently points to `app.main:app`, but `backend/app/main.py` does not exist yet. The backend container will not start until the roadmap creates the API entrypoint.
+- Alembic is initialized. Generate and apply the first real migration only after the User-model gate and step 2.2.
+- The backend exposes `/api/health` on host port 8000 after `docker compose up`; rebuild the backend image after source or dependency changes because Compose has no source volume mount.
 
 ## OpenCode workflow
 

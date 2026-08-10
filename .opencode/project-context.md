@@ -20,13 +20,18 @@ meteo/
 │   ├── app/
 │   │   ├── config.py
 │   │   ├── database.py
+│   │   ├── main.py             # FastAPI app e /api/health
 │   │   ├── cli/
 │   │   ├── models/
-│   │   │   └── user.py          # walking skeleton; review postponed
+│   │   │   └── user.py          # User model confirmed in Phase 2
 │   │   ├── schemas/
 │   │   ├── routers/
 │   │   └── services/
 │   ├── requirements.txt
+│   ├── pytest.ini
+│   ├── tests/
+│   ├── alembic.ini
+│   ├── alembic/
 │   └── Dockerfile
 ├── docs/
 │   └── project/
@@ -43,12 +48,14 @@ meteo/
 
 La fonte unica per fasi, dipendenze, criteri di accettazione e stato è `docs/project/roadmap.md`. La roadmap traduce gli sprint MVP del PRD in passi verificabili.
 
-## Regole per l'agente
+## Regole per il consulente
 
 - Per decisioni su librerie/framework, consultare `docs/project/stack-reference.md`
 - Per lo stato del progetto e roadmap, consultare `docs/project/roadmap.md` e `.opencode/project_ideas/PRD.md`
 - Usare Context7 per fetchare documentazione aggiornata quando necessario
 - Seguire le convenzioni specificate in `docs/project/stack-reference.md#9-convenzioni-di-progetto`
-- Non estendere `backend/app/models/user.py`: l'analisi del modello è rinviata su richiesta dell'utente e costituisce un gate della roadmap.
-- **Non aggiungere commenti al codice** (tranne se esplicitamente richiesto)
+- `backend/app/models/user.py` è stato confermato nella Fase 2; le modifiche future devono rispettare il modello e passare dalla roadmap.
+- Il codice deve restare semplice e didattico; i commenti sono consentiti quando spiegano un concetto, un comando o una decisione non ovvia.
+- I piani sono guide operative per l'utente umano: devono includere concetti, file, comandi scomposti, risultati attesi e punti in cui chiedere aiuto.
+- L'utente implementa personalmente il codice. Il consulente spiega, propone, diagnostica e verifica; non attiva worker automatici e non presume l'uso di `$start-work`.
 - Prima di scrivere codice, leggere i file esistenti per capire lo stile

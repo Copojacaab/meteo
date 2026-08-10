@@ -16,12 +16,12 @@
 | Elemento | Stato | Nota |
 |---|---|---|
 | `database.py` | ✅ | Engine async, session factory, `Base` e `get_db` presenti |
-| `config.py` | ✅ | Settings iniziali con URL DB e secret da ambiente |
-| `models/user.py` | ⏸️ | Walking skeleton presente; analisi rinviata su richiesta dell'utente |
-| `app/main.py` | ⬜ | Assente; necessario per avviare il backend |
-| Alembic | ⬜ | Dipendenza presente, struttura non inizializzata |
+| `config.py` | ✅ | Settings con URL DB, secret e scadenza JWT da ambiente |
+| `models/user.py` | ✅ | Modello confermato con email unica, hash password e timestamp |
+| `app/main.py` | ✅ | App FastAPI con healthcheck e router auth registrato |
+| Alembic | ✅ | Ambiente async configurato; migrazione `users` applicata |
 | CLI | ⬜ | Scheletro Typer con comandi DB placeholder |
-| Test | ⬜ | Nessun test presente |
+| Test | ✅ | pytest + pytest-asyncio configurati; suite baseline e auth verde |
 | Frontend | ⬜ | Non ancora creato; servizio Compose commentato |
 
 ## Fase 1 — Baseline eseguibile
@@ -30,23 +30,23 @@ Questa fase rende verificabile lo scaffold e prepara il lavoro applicativo. Corr
 
 | Step | Obiettivo | Deliverable | Dipendenze | Criterio di accettazione | Stato |
 |---|---|---|---|---|---|
-| 1.1 | Test baseline | Aggiungere `pytest`, `pytest-asyncio` e `httpx`; configurare raccolta test e fixture minime | Nessuna | `pytest` raccoglie ed esegue almeno un test verde | ⬜ |
-| 1.2 | Entry point API | Creare `backend/app/main.py` con app FastAPI e endpoint `/api/health` | 1.1 | `docker compose up --build` avvia il backend e `curl localhost:8000/api/health` restituisce HTTP 200 | ⬜ |
-| 1.3 | Migrazioni | Inizializzare Alembic in `backend/`, configurare ambiente async, `settings.database_url`, `Base.metadata` e import dei modelli | 1.2 | `alembic upgrade head` termina senza errori su un database vuoto | ⬜ |
+| 1.1 | Test baseline | Aggiungere `pytest`, `pytest-asyncio` e `httpx`; configurare raccolta test e fixture minime | Nessuna | `pytest` raccoglie ed esegue almeno un test verde | ✅ |
+| 1.2 | Entry point API | Creare `backend/app/main.py` con app FastAPI e endpoint `/api/health` | 1.1 | `docker compose up --build` avvia il backend e `curl localhost:8000/api/health` restituisce HTTP 200 | ✅ |
+| 1.3 | Migrazioni | Inizializzare Alembic in `backend/`, configurare ambiente async, `settings.database_url`, `Base.metadata` e import dei modelli | 1.2 | `alembic upgrade head` termina senza errori su un database vuoto | ✅ |
 
-Il `Dockerfile` attuale punta correttamente a `app.main:app` una volta creato l'entry point. Hardening Dockerfile, utente non-root e healthcheck di produzione sono rimandati alla fase opzionale finale.
+Il `Dockerfile` punta a `app.main:app` e il backend è verificabile sulla porta 8000. Il compose non monta il codice locale nel container: dopo modifiche a dipendenze o codice è necessario ricostruire l'immagine. Hardening Dockerfile, utente non-root e healthcheck di produzione sono rimandati alla fase opzionale finale.
 
 ## Fase 2 — Autenticazione
 
-Questa fase completa la parte auth dello Sprint 1. Il primo step è bloccato finché l'utente non sblocca l'analisi del modello `User`.
+Questa fase completa la parte auth dello Sprint 1. Il modello `User` è stato confermato invariato; la fase è verificata con test API, service e persistenza.
 
 | Step | Obiettivo | Deliverable | Dipendenze | Criterio di accettazione | Stato |
 |---|---|---|---|---|---|
-| 2.1 | Revisione User | Analizzare e confermare campi, vincoli, timestamp e responsabilità del modello | Gate esplicito dell'utente | Specifica approvata senza modificare il modello prima della conferma | ⏸️ |
-| 2.2 | Persistenza User | Test di vincoli e CRUD; prima migrazione con tabella `users` | 1.3, 2.1 | Migrazione applicata; email unica e password memorizzata solo come hash | ⬜ |
-| 2.3 | Service auth | Registrazione, verifica password e login con `pwdlib`/Argon2 | 2.2 | Test unitari verdi per registrazione, credenziali valide e credenziali errate | ⬜ |
-| 2.4 | Router auth | Endpoint `/api/auth/register` e `/api/auth/login` con JWT | 2.3 | Test API verdi; login restituisce access token senza esporre la password | ⬜ |
-| 2.5 | Dipendenze auth | `get_current_user`, OAuth2 bearer e gestione degli errori 401 | 2.4 | Un endpoint protetto rifiuta token assente, invalido o scaduto | ⬜ |
+| 2.1 | Revisione User | Analizzare e confermare campi, vincoli, timestamp e responsabilità del modello | Gate esplicito dell'utente | Specifica approvata senza modificare il modello prima della conferma | ✅ |
+| 2.2 | Persistenza User | Test di vincoli e CRUD; prima migrazione con tabella `users` | 1.3, 2.1 | Migrazione applicata; email unica e password memorizzata solo come hash | ✅ |
+| 2.3 | Service auth | Registrazione, verifica password e login con `pwdlib`/Argon2 | 2.2 | Test unitari verdi per registrazione, credenziali valide e credenziali errate | ✅ |
+| 2.4 | Router auth | Endpoint `/api/auth/register` e `/api/auth/login` con JWT | 2.3 | Test API verdi; login restituisce access token senza esporre la password | ✅ |
+| 2.5 | Dipendenze auth | `get_current_user`, OAuth2 bearer e gestione degli errori 401 | 2.4 | Un endpoint protetto rifiuta token assente, invalido o scaduto | ✅ |
 
 ## Fase 3 — Spot e mappa
 
