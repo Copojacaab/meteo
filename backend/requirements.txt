@@ -6,6 +6,8 @@ geoalchemy2                             # estenzione spaziale: salva GPS e query
 alembic                                 # DB migrating: fa evolvere lo schema senza perdere dati
 python-jose[cryptography]               # JWT
 pwdlib[argon2]                          # hasing password
+python-multipart                        # form data: necessario a OAuth2PasswordRequestForm (login)
+pydantic[email]                         # validazione EmailStr negli schemas
 httpx                                   # HTTP client async: chiama Open-meteo api
 pydantic-settings                       # config: legge env var
 
