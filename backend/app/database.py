@@ -18,12 +18,13 @@ from .config import settings
 # =================
 
 from sqlalchemy.ext.asyncio import AsyncAttrs, AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.pool import NullPool
 from sqlalchemy.orm import DeclarativeBase
 
 DATABASE_URL = settings.database_url
 
 #  (1) crea engine asincrono
-engine = create_async_engine(DATABASE_URL, echo=True)
+engine = create_async_engine(DATABASE_URL, echo=True, poolclass=NullPool)
 
 # (2) crea la factory di sessioni
 AsyncSessionLocal = async_sessionmaker(
