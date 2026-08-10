@@ -12,6 +12,7 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql+asyncpg://meteo:meteo_dev@db:5432/meteo"
     secret_key: str = "dev-secret-key-change-in-production"
+    access_token_expire_minutes: int = 30
 
 settings = Settings()
 
