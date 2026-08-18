@@ -13,14 +13,17 @@
         db_session -> sessione AsyncSession collegata al DB di compose
         api_client -> client httpx che sovrascrive get_db, cosi' i test non dipendono dal wiring dell'app
 """
-
 import pytest
 import httpx
 from sqlalchemy import delete
 
+
 from app.config import Settings
 from app.database import AsyncSessionLocal, Base, engine, get_db
+
 from app.models.user import User
+from app.models.spot import Spot
+
 
 @pytest.fixture
 def settings() -> Settings:
@@ -45,6 +48,8 @@ async def clean_db():
     yield
 
     async with AsyncSessionLocal() as session:
+        # ORDINE IMPORTANTE: Spot FK verso User (Referencial Integrity)
+        await session.execute(delete(Spot))
         await session.execute(delete(User))
         await session.commit()
 

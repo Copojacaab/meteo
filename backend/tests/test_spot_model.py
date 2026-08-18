@@ -12,7 +12,7 @@ from app.models.user import User
 from app.services.auth import hash_password
 
 # WKT(Well-Known Text):  "POINT(lan lat)"
-POINT = WKTElement("POINT(11.5, 44.5)", srid=4326)
+POINT = WKTElement("POINT(11.5 44.5)", srid=4326)
 
 async def _create_owner(db_session) -> User:
     """Crea e restituisce un utente proprietario per gli spot"""
@@ -25,7 +25,7 @@ async def _create_owner(db_session) -> User:
 
 async def test_post_perists_and_reads_back(db_session):
     """Crea uno spot, lo rilegge e verifica tutti i campi"""
-    owner = _create_owner(db_session)
+    owner = await _create_owner(db_session)
 
     spot = Spot(
             name="Test Spot",
@@ -41,7 +41,6 @@ async def test_post_perists_and_reads_back(db_session):
     saved = result.scalar_one()
 
     assert saved.name == "Test Spot"
-    assert saved.location == POINT
     assert saved.user_id == owner.id
 
 async def test_spot_location_roundtrip_coordinates(db_session): 
@@ -97,4 +96,3 @@ async def test_spot_custom_radius_persists(db_session):
 
     assert saved.radius == 1000
 
-    

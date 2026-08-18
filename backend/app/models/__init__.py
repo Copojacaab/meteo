@@ -5,6 +5,7 @@
     
 """
 from app.models.user import User
+from app.models.spot import Spot
 
-__all__ = ["User"]
+__all__ = ["User", "Spot"]
 
