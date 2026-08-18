@@ -11,7 +11,7 @@ from sqlalchemy import String, Integer, func
 from app.database import Base
 
 class User(Base):
-    __tablename__ = "users"
+    __tablename__ = "users"                         #tablename showed in Base.metadata.create_all and in the database
 
     #  Attr
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
