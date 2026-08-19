@@ -89,3 +89,14 @@ async def owner(db_session) -> User:
     db_session.refresh(user)
     return user
 
+
+@pytest.fixture
+async def other_owner(db_session) -> User:
+    other_user = User(
+        email="otherowner@example.com",
+        hashed_password = hash_password("other_secret123")
+    )
+    db_session.add()
+    db_session.commit()
+    db_session.refresh(other_owner)
+    return other_owner
