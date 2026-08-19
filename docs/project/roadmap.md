@@ -55,7 +55,7 @@ Questa fase implementa lo Sprint 2 del PRD.
 | Step | Obiettivo | Deliverable | Dipendenze | Criterio di accettazione | Stato |
 |---|---|---|---|---|---|
 | 3.1 | Modello Spot | Modello con proprietario, nome, coordinate PostGIS POINT e raggio | Fase 2 | Test di validazione e persistenza dello spot verdi | ✅ |
-| 3.2 | Migrazione Spot | Migrazione dello schema `spots` con indice spaziale se necessario | 3.1 | `alembic upgrade head` crea lo schema senza errori | ⬜ |
+| 3.2 | Migrazione Spot | Migrazione dello schema `spots` con indice spaziale se necessario | 3.1 | `alembic upgrade head` crea lo schema senza errori | ✅ |
 | 3.3 | Service Spot | CRUD e query spaziali con controllo ownership | 3.2 | Un utente non può leggere o modificare spot di un altro utente | ⬜ |
 | 3.4 | API Spot | Schemas Pydantic e router `/api/spots/*` | 3.3 | Test API verdi per creazione, lettura, modifica e cancellazione | ⬜ |
 | 3.5 | Frontend base | Progetto React/Vite/Tailwind con autenticazione e client API | 3.4 | Frontend avviabile e login collegato al backend | ⬜ |

@@ -24,6 +24,7 @@ from app.database import AsyncSessionLocal, Base, engine, get_db
 from app.models.user import User
 from app.models.spot import Spot
 
+from app.services.auth import hash_password
 
 @pytest.fixture
 def settings() -> Settings:
@@ -75,3 +76,16 @@ async def api_client(clean_db):
         yield client
 
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+async def owner(db_session) -> User:
+    user = User(
+        email="owner@example.com",
+        hashed_password=hash_password("secret123")
+    )
+    db_session.add()
+    db_session.commit()
+    db_session.refresh(user)
+    return user
+
