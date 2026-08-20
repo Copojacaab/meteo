@@ -84,9 +84,9 @@ async def owner(db_session) -> User:
         email="owner@example.com",
         hashed_password=hash_password("secret123")
     )
-    db_session.add()
-    db_session.commit()
-    db_session.refresh(user)
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
     return user
 
 
@@ -96,7 +96,7 @@ async def other_owner(db_session) -> User:
         email="otherowner@example.com",
         hashed_password = hash_password("other_secret123")
     )
-    db_session.add()
-    db_session.commit()
-    db_session.refresh(other_owner)
-    return other_owner
+    db_session.add(other_user)
+    await db_session.commit()
+    await db_session.refresh(other_user)
+    return other_user

@@ -6,13 +6,13 @@ import pytest
 from sqlalchemy import func, select
 
 from app.models.spot import Spot
-from app.services.spots import create_spot
+from app.services.spot import create_spot, get_spot_by_id, list_spot_by_owner
 
 async def test_create_spot_persists_with_default_radius(db_session, owner):
     spot = await create_spot(
-            db_session=db_session,
-            name="Test Spot",
+            session=db_session,
             user_id=owner.id,
+            name="Test Spot",
             longitude=11.5, latitude=44.5
             )
 
@@ -24,9 +24,9 @@ async def test_create_spot_persists_with_default_radius(db_session, owner):
 
 async def test_create_spot_custom_radius(db_session, owner):
     spot = await create_spot(
-            db_session=db_session,
-            name="Test Spot",
+            session=db_session,
             user_id=owner.id,
+            name="Test Spot",
             longitude=11.5, latitude=44.5,
             radius=1000
             )
@@ -35,10 +35,10 @@ async def test_create_spot_custom_radius(db_session, owner):
 
 async def test_create_spot_roundtrip_coordinates(db_session, owner):
     """Le coordinate tornano identiche da PostGIS (ST_AsText)"""
-    await create_spot(db_session, "Test Spot", owner.id, 11.5, 44.5)
+    await create_spot(db_session, owner.id, "Test Spot", 11.5, 44.5)
 
     result = await db_session.execute(
-        func.ST_AsText(select(Spot.location).where(Spot.name == "Test Spot"))
-        )
+        select(func.ST_AsText(Spot.location)).where(Spot.name == "Test Spot")
+    )
 
     assert result.scalar_one() == "POINT(11.5 44.5)"
