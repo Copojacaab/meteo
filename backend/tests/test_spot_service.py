@@ -99,13 +99,14 @@ async def test_update_spot_changes_owner_spot(db_session, owner):
     assert updated.radius == 1000
 
     result = await db_session.execute(
-        select(
-            func.As_Text(Spot.location).where(Spot.id==spot.id,Spot.user_id==owner.id)
-            ))
+        select(func.ST_AsText(Spot.location)).where(Spot.id==spot.id,Spot.user_id==owner.id)
+        )
 
     assert result.scalar_one() == "POINT(11.6 44.6)"
 
 # --- Aggiornamento con controllo ownership ---
+
+from app.services.spot import update_spot
 
 async def test_update_spot_denies_other_user(db_session, owner, other_owner):
     spot = await create_spot(
@@ -138,8 +139,8 @@ async def test_update_spot_denies_other_user(db_session, owner, other_owner):
     assert found.name == "Mio Spot"
     
     result = await db_session.execute(
-        select(func.AsText(Spot.location).where(Spot.id==spot.id, Spot.user_id==owner.id))
-    )
+        select(func.ST_AsText(Spot.location)).where(Spot.id==spot.id, Spot.user_id==owner.id)
+        )
 
     assert result.scalar_one() == "POINT(11.5 44.5)"
 
@@ -186,4 +187,3 @@ async def test_delete_spot_denies_other_user(db_session, owner, other_owner):
 
     assert deleted is False
     assert await get_spot_by_id(db_session, owner.id, spot.id) is not None
-    
