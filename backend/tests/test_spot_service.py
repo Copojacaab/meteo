@@ -56,15 +56,15 @@ async def test_get_spot_by_id_return_own_spot(db_session, owner):
     assert found.name == "Mio Spot"
     assert found.id == spot.id
 
-async def test_get_spot_by_id_denies_other_user(db_session, owner, not_the_owner):
+async def test_get_spot_by_id_denies_other_user(db_session, owner, other_owner):
     spot = await create_spot(db_session, owner.id, "Mio Spot", 11.5, 44.5)
 
-    found = await get_spot_by_id(db_session, not_owner.id)
+    found = await get_spot_by_id(db_session, other_owner.id, spot.id)
 
     assert found is None
 
-async def test_get_spot_by_id_return_none_for_missing(db_session, not_an_owner):
-    found = await get_spot_by_id(db_session, not_an_owner.id)
+async def test_get_spot_by_id_return_none_for_missing(db_session, other_owner):
+    found = await get_spot_by_id(db_session, other_owner.id, spot_id=1)
 
     assert found is None
 

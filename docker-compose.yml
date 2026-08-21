@@ -24,6 +24,8 @@ services:         # (1) lista dei container
     environment: 
       DATABASE_URL: postgresql+asyncpg://meteo:meteo_dev@db:5432/meteo
       SECRET_KEY: dev-secret-key-change-in-production
+    volumes:
+      - ./backend:/app                # bind mount: codice visibile nel container senza rebuild (uvicorn ha --reload integrato)
     depends_on:                       #2e. backedn parte solo quando db healthy
       db: 
         condition: service_healthy
