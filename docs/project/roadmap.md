@@ -61,6 +61,14 @@ Questa fase implementa lo Sprint 2 del PRD.
 | 3.5 | Frontend base | Progetto React/Vite/Tailwind con autenticazione e client API | 3.4 | Frontend avviabile e login collegato al backend | ⬜ |
 | 3.6 | Mappa | MapLibre con creazione, visualizzazione e selezione degli spot | 3.5 | L'utente vede e gestisce dalla mappa esclusivamente i propri spot | ⬜ |
 
+NOTE:
+- 3.3: Alla fine dello step il service spot deve permettere di
+    - creare uno spot
+    - leggere un proprio spot
+    - listare solo i propri spot
+    - modificare un proprio spot
+    - cancellare un proprio spot
+
 ## Fase 4 — Dati Open-Meteo
 
 Questa fase implementa lo Sprint 3 del PRD.

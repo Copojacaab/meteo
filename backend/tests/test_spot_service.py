@@ -78,4 +78,112 @@ async def test_list_spot_by_owner_returns_only_own(db_session, owner, other_owne
 
     assert len(spots) == 2
     assert all(s.user_id == owner.id for s in spots)
+
+# --- Aggiornamento (crUd) Spot ---
+
+async def test_update_spot_changes_owner_spot(db_session, owner):
+    spot = await create_spot(db_session, owner.id, "Vecchio Nome", 11.5, 44.5,)
+
+    updated = await update_spot(
+        session=db_session,
+        user_id=owner.id,
+        spot_id=spot.id,
+        new_name="Nuovo Nome",
+        new_lon=11.6, 
+        new_lat=44.6,
+        new_radius=1000
+    )
+
+    assert updated is not None
+    assert updated.name == "Nuovo Nome" 
+    assert updated.radius == 1000
+
+    result = await db_session.execute(
+        select(
+            func.As_Text(Spot.location).where(Spot.id==spot.id,Spot.user_id==owner.id)
+            ))
+
+    assert result.scalar_one() == "POINT(11.6 44.6)"
+
+# --- Aggiornamento con controllo ownership ---
+
+async def test_update_spot_denies_other_user(db_session, owner, other_owner):
+    spot = await create_spot(
+        db_session, 
+        owner.id,
+        "Mio Spot",
+        11.5, 
+        44.5,
+    )
+
+    updated = await update_spot(
+        db_session,
+        other_owner.id,
+        spot.id,
+        "Spot Modificato",
+        12.0,
+        45.0,
+        2000,
+    )
+
+    assert updated is None
+
+    found = await get_spot_by_id(
+        db_session,
+        owner.id,
+        spot.id
+    )
+
+    assert found is not None
+    assert found.name == "Mio Spot"
+    
+    result = await db_session.execute(
+        select(func.AsText(Spot.location).where(Spot.id==spot.id, Spot.user_id==owner.id))
+    )
+
+    assert result.scalar_one() == "POINT(11.5 44.5)"
+
+    assert found.radius == 500
+
+# --- Cancellazione (cruD) Spot ---
+
+from app.services.spot import delete_spot
+
+async def test_delete_spot_removes_owner_spot(db_session, owner):
+    spot = await create_spot(
+        db_session,
+        owner.id,
+        "Da Eliminare",
+        11.5,
+        44.5,
+    )
+
+    deleted = await delete_spot(
+        session=db_session,
+        user_id=owner.id,
+        spot_id=spot.id,
+    )
+
+    assert deleted is True
+    assert await get_spot_by_id(db_session, owner.id, spot.id) is None
+
+# --- Cancellazione con controllo ownership ---
+
+async def test_delete_spot_denies_other_user(db_session, owner, other_owner):
+    spot = await create_spot(
+        db_session, 
+        owner.id,
+        "Mio Spot",
+        11.5, 
+        44.5,
+    )
+
+    deleted = await delete_spot(
+        db_session,
+        other_owner.id,
+        spot.id,
+    )
+
+    assert deleted is False
+    assert await get_spot_by_id(db_session, owner.id, spot.id) is not None
     

@@ -1,5 +1,15 @@
 """
-    Service Spot: business logic per gli spot con controllo di ownership
+    Service Spot: business logic per gli spot con controllo di ownership. Permette di
+        - creare uno spot
+        - leggere un proprio spot
+        - listare solo i propri spot
+        - modificare un proprio spot
+        - cancellare un proprio spot
+        Un utente diverso non deve poter leggere, modificare o cancellare lo spot
+
+        Il controllo deve essere applicato nel service tramite la coppia:
+            - Spot.id == spot_id
+            - Spot.user_id == user_id
 """
 from geoalchemy2.elements import WKTElement
 from sqlalchemy import select
